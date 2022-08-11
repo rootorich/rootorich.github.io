@@ -3,7 +3,7 @@ body {
   font-weight: bold;
 }
 
-body div {
+body>div {
   display: flex;
 
   flex-direction: column;
@@ -17,6 +17,8 @@ img {
 
 .container {
   justify-content: center;
+
+  text-align: center;
 }
 
 .text {
