@@ -22,6 +22,10 @@ body {
   color: rgb(120, 60, 0);
 }
 
+a {
+  color: rgb(64, 0, 128);
+}
+
 a:hover {
   color: rgb(120, 60, 0);
 }
