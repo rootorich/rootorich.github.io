@@ -1,0 +1,74 @@
+.title {
+  font-size: 70px;
+  font-weight: bold;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+
+
+  vertical-align: top;
+}
+
+.ex {
+  display: flex;
+  align-items: center
+}
+
+.ex .symb {
+  font-size: 180px;
+  font-weight: 100;
+}
+
+.ex .exs {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+
+  font-size: 32px;
+
+}
+
+.ex sub {
+  font-size: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+
+  height: 150px;
+}
+
+input[type=text] {
+  width: 100px;
+  height: 30px;
+
+  font-size: 20px;
+  text-align: center;
+  color: rgb(120, 60, 0);
+
+
+  background-color: rgb(12, 33, 78);
+
+  /* outline: 0; */
+  border: 2px solid rgb(120, 60, 0);
+  border-radius: 20px;
+}
+
+input[type=text]::placeholder {
+  color: rgb(30, 100, 15);
+}
+
+input[type=text]:focus-visible {
+  border-color: rgb(30, 100, 15);
+  outline: none;
+}
+
+#result {
+  text-align: center;
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Изичное испытание</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Karla:400" rel="stylesheet" type="text/css">
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/easy_peasy.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="title">Начнём с простой системы</div>
+
+        <div class="ex">
+            <span class="symb">{</span>
+            <div class="exs">
+                <span>x<sup>2</sup> - 25x + 136 = 0</span>
+                <span>2 * log<sub>8y</sub>32 = 1</span>
+                <span>x<sup>2</sup> - 6x + 19 = 8 * log<sub>&#8731;x</sub>(y) - &#8730;(2y) - 5</span>
+            </div>
+        </div>
+
+        <form class="content" name="form">
+
+            <span>x = <input type="text" name="x" placeholder="0"></span>
+            <span>y = <input type="text" name="y" placeholder="0"></span>
+
+            <input type="button" value="Проверить" onClick="check(form.x.value, form.y.value)">
+
+        </form>
+
+        <div id="result">Результат решения</div>
+    </div>
+
+    <script>
+
+        function check(x, y) {
+            if (x ** 2 - 6 * x + 19 == 8 * (Math.log(y) / (Math.log(x ** (1 / 3)))) - Math.sqrt(2 * y) - 5) {
+                document.getElementById('result').innerHTML = "Правильно! Отправь мне эти числа";
+                document.getElementById('result').style.color = 'rgb(30, 100, 15)';
+            }
+            else {
+                document.getElementById('result').innerHTML = "Неправильно";
+                document.getElementById('result').style.color = 'rgb(120, 60, 0)';
+            }
+        }
+
+        function test2(val) {
+            var v = val * 132;
+
+            var len = v.toString().length;
+            console.log(v);
+            console.log(len);
+
+            var temp2 = 0
+            for (let i = 0; i < len; i++) {
+                var temp = v % 10;
+
+                temp2 += (temp % 2 == 0) ? temp * 3 : temp * 2;
+
+                v -= temp;
+                v /= 10;
+            }
+            console.log(temp2);
+
+            return temp2 * val;
+        }
+
+    </script>
+</body>
+
+</html>

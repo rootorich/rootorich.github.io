@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Самая быстрая рука на диком Западе</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Karla:400" rel="stylesheet" type="text/css">
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/fast_hand.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="title">
+            <span class="title-main">Тот самый сайт</span><br>
+            <span class="title-plus">который я на самом деле создавал</span>
+        </div>
+
+        <div class="desc" id="desc">Тебе нужно справиться за <span id="time"></span> сек.</div>
+
+        <div class="spells" id="spells">
+            <div id="spell-0"></div>
+            <div id="spell-1"></div>
+            <div id="spell-2"></div>
+            <div id="spell-3"></div>
+            <div id="spell-4"></div>
+            <div id="spell-5"></div>
+            <div id="spell-6"></div>
+            <div id="spell-7"></div>
+            <div id="spell-8"></div>
+            <div id="spell-9"></div>
+        </div>
+
+        <div class="spheres" id="spheres">
+            <div id="sphere-0"></div>
+            <div id="sphere-1"></div>
+            <div id="sphere-2"></div>
+        </div>
+
+        <input type="button" value="Начать" onClick="begin()">
+
+        <div class="res">
+            <div id="result">Итоговое время</div>
+            <div id="itog"></div>
+            <div id="send"></div>
+        </div>
+    </div>
+
+    <script>
+
+        var listSpheres = [0, 0, 0];
+        var listSpells = ['111', '112', '113', '122', '123', '133', '222', '223', '233', '333'];
+        var listRequiredSpells = [];
+        var idCurrentSpell = 0;
+        var spell;
+
+        var timerBegin;
+        var timerEnd;
+
+        var countTry = 0;
+        var record = 1000;
+        var needTime = 7;
+
+        document.getElementById('time').innerHTML = needTime;
+
+        document.addEventListener('keydown', function (event) {
+            switch (event.code) {
+                case 'KeyQ':
+                    pressSphere(1);
+                    break;
+                case 'KeyW':
+                    pressSphere(2);
+                    break;
+                case 'KeyE':
+                    pressSphere(3);
+                    break;
+                case 'KeyR':
+                    cast();
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        function begin() {
+            document.getElementById('result').innerHTML = 'Итоговое время';
+            countTry++;
+
+            fill();
+
+            timerBegin = new Date().getTime();
+        }
+
+        function fill() {
+            reset();
+
+            listRequiredSpells.push(listSpells[Math.floor(Math.random()*10)]);
+            document.getElementById('spell-0').style.backgroundImage = "url('img/" + listRequiredSpells[0] + ".webp')";
+
+            for (let i = 1; i < 10; i++) {
+
+                let tempSpell;
+                do {
+                    tempSpell = listSpells[Math.floor(Math.random()*10)];
+                } while (tempSpell == listRequiredSpells[i-1]);
+
+                listRequiredSpells.push(tempSpell);
+                document.getElementById('spell-'+ i).style.backgroundImage = "url('img/" + listRequiredSpells[i] + ".webp')";
+            }
+        }
+
+        function reset() {
+            for (let i = 0; i < listRequiredSpells.length; i++) {
+                document.getElementById('spell-'+ i).style.backgroundColor = '';
+            }
+            listRequiredSpells = [];
+            idCurrentSpell = 0;
+            for (let i = 0; i < listSpheres.length; i++) {
+                listSpheres[i] = 0;
+                document.getElementById('sphere-'+ i).style.backgroundImage = "url('img/0.webp')"
+            }
+        }
+
+        function cast() {
+            var isCast = true;
+            listSpheres.forEach(el => {
+                if (el == 0) {
+                    isCast = false;
+                }
+            });
+
+            if (isCast) {
+                spell = [...listSpheres].sort(function (a, b) {
+                    return a - b;
+                }).join('');
+
+                if (spell == listRequiredSpells[idCurrentSpell]) {
+                    document.getElementById('spell-'+ idCurrentSpell).style.backgroundColor = 'rgb(0, 255, 0)';
+
+                    idCurrentSpell++;
+                    if (idCurrentSpell == 10) {
+                        end();
+                    }
+                }
+            }
+        }
+
+        function end() {
+            timerEnd = (((new Date().getTime()) - timerBegin) / 1000).toFixed(2);
+
+            document.getElementById('result').innerHTML = 'Итоговое время ' + timerEnd;
+
+            check();
+        }
+
+        function pressSphere(sphere) {
+            listSpheres[0] = listSpheres[1];
+            listSpheres[1] = listSpheres[2];
+            listSpheres[2] = sphere;
+
+            for (let i = 0; i < listSpheres.length; i++) {
+                document.getElementById('sphere-'+ i).style.backgroundImage = "url('img/" + listSpheres[i] + ".webp')"
+            }
+        }
+
+        function check() {
+            let itog = document.getElementById('itog');
+            timerEnd -= 10;
+            if (timerEnd < record) record = timerEnd;
+
+            if (timerEnd <= needTime) {
+                if (countTry == 1) {
+                    needTime -= 0.2;
+                    if (timerEnd > needTime) {
+                        itog.innerHTML = "Полегче жоский. давай усложним до " + needTime;
+                    } else {
+                        itog.innerHTML = `Жесть ты мощный. Хотел усложнить до ${needTime}, если быстро справишься, но ты уже справился`;
+                        win();
+                    }
+                } else {
+                    itog.innerHTML = "Отлично. Ты справился";
+                    win();
+                }
+            } else if (countTry % 5 == 0) {
+                needTime += 0.2;
+                if (record <= needTime) {
+                    itog.innerHTML = `Ладно. Мне хватит твоего ${record}`;
+                    win();
+                } else {
+                    itog.innerHTML = `Ладно. Давай хотя бы ${needTime}`;
+                }
+            }
+
+            document.getElementById('time').innerHTML = needTime;
+        }
+
+        function win() {
+            let str = document.getElementById('itog').innerHTML.slice(0, 5);
+
+            let sum = 0;
+
+            for (let i = 0; i < str.length; i++) {
+                sum += str.charCodeAt(i);
+            }
+
+            document.getElementById('send').innerHTML = 'Отправь мне ' + sum;
+            document.getElementById('desc').remove();
+        }
+
+        function test2(val) {
+            var v = val * 132;
+
+            var len = v.toString().length;
+            console.log(v);
+            console.log(len);
+
+            var temp2 = 0
+            for (let i = 0; i < len; i++) {
+                var temp = v % 10;
+
+                temp2 += (temp % 2 == 0) ? temp * 3 : temp * 2;
+
+                v -= temp;
+                v /= 10;
+            }
+            console.log(temp2);
+
+            return temp2 * val;
+        }
+
+
+        /*
+
+        y - loose
+        o - break (10% ? start break)
+        x - enemy, whose need catch
+
+
+        ___________________
+        | |y| |y| |y| |y| |
+        -------------------
+        |y|-|-|-|-|-|-|-|y|
+        -------------------
+        | |-|-|-|-|-|o|-| |
+        -------------------
+        |y|-|o|-|-|-|-|-|y|
+        -------------------
+        | |-|-|-|x|-|-|-| |
+        -------------------
+        |y|-|-|-|-|-|-|-|y|
+        -------------------
+        | |-|-|-|-|o|-|-| |
+        -------------------
+        |y|-|-|-|-|-|-|-|y|
+        -------------------
+        | |y| |y| |y| |y| |
+        -------------------
+        */
+
+    </script>
+</body>
+
+</html>
