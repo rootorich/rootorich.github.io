@@ -19,7 +19,7 @@ body {
   /* background: url(../img/background.png); */
   background-color: rgb(8, 25, 63);
   background-size: 1440px;
-  color: rgb(120, 60, 0);
+  color: rgb(180, 85, 0);
 }
 
 a {
@@ -27,7 +27,7 @@ a {
 }
 
 a:hover {
-  color: rgb(120, 60, 0);
+  color: rgb(180, 85, 0);
 }
 
 input[type=button] {
@@ -38,7 +38,7 @@ input[type=button] {
 
   font-size: 20px;
 
-  background-color: rgb(120, 60, 0);
+  background-color: rgb(180, 85, 0);
 
   border-radius: 20px;
 }
