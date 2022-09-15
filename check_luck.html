@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Добей врага</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Karla:400" rel="stylesheet" type="text/css">
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/check_luck.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+    <div class="game" id="game">
+        <div class="gabe" id="gabe"></div>
+
+        <div class="invoker" id="invoker"></div>
+        <div class="enemy" id="enemy"></div>
+
+    </div>
+
+    <div class="skills" id="skills">
+        <div id="attack"></div>
+        <div id="skill"></div>
+    </div>
+    
+    <br>
+
+    <input type="button" value="Начать" onClick="begin()">
+
+    <script>
+
+        hitChance = 10;
+        
+        hpEnemy = 3;
+        hitBoxRadiusEnemy = 24;
+
+        hitBoxRadiusSkill = 175/2;
+
+        turn = 3;
+
+        gabeOpacity = 0;
+
+        function begin() {
+            gabeOpacity += 0.01;
+            document.getElementById("gabe").style.opacity = gabeOpacity;
+        }
+
+        function attack() {
+
+            chance = Math.random * 100;
+
+            if (chance <= hitChance) {
+
+                hpEnemy--;
+            }
+
+            turn--;
+
+            if (turn <= 0) {
+                check();
+            }
+        }
+
+        function skill(xSkill, ySkill) {
+
+            enemy = document.getElementById("enemy");
+
+            xEnemy = enemy.style.left;
+            yEnemy = enemy.style.top;
+
+            if (hitBoxRadiusSkill+hitBoxRadiusEnemy >= Math.sqrt((x-xEnemy)**2 + (y-yEnemy)**2)) {
+                hpEnemy--;
+            }
+
+            turn--;
+
+            if (turn <= 0) {
+                check();
+            }
+        }
+
+        function check() {
+            if (hpEnemy > 0) {
+                lose();
+            } else {
+                win();
+            }
+        }
+
+        function lose() {
+
+            hitChance += 5;
+            hpEnemy = 3;
+
+            document.getElementById("game").style.opacity += 0.05;
+        }
+
+        function win() {
+            
+        }
+
+        function check(x, y) {
+
+            // for (let i = 0; i < 3; i++) {
+            //     val = test2(val);
+
+            // }
+
+            console.log(x * x - 6 * x + 19);
+
+            if (x ** 2 - 6 * x + 19 == 8 * (Math.log(y) / (Math.log(x ** (1 / 3)))) - Math.sqrt(2 * y) - 5)
+                document.getElementById('yeah').innerHTML = "Правильно! Отправь мне эти числа";
+            else
+                document.getElementById('yeah').innerHTML = "Неправильно";
+        }
+
+        function test2(val) {
+            var v = val * 132;
+
+            var len = v.toString().length;
+            console.log(v);
+            console.log(len);
+
+            var temp2 = 0
+            for (let i = 0; i < len; i++) {
+                var temp = v % 10;
+
+                temp2 += (temp % 2 == 0) ? temp * 3 : temp * 2;
+
+                v -= temp;
+                v /= 10;
+            }
+            console.log(temp2);
+
+            return temp2 * val;
+        }
+
+    </script>
+
+</body>
+
+</html>
