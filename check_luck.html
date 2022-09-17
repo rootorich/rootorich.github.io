@@ -16,69 +16,167 @@
     <div class="game" id="game">
         <div class="gabe" id="gabe"></div>
 
-        <div class="invoker" id="invoker"></div>
-        <div class="enemy" id="enemy"></div>
+        <div class="invoker hero" id="invoker"></div>
+        <div class="enemy hero" id="enemy"></div>
 
+        <div class="sun" id="sun"></div>
+
+        <div class="hp" id="hp">3 HP</div>
+        <div class="miss" id="miss">Miss</div>
+        <div class="suc" id="suc">Hit</div>
     </div>
 
     <div class="skills" id="skills">
-        <div id="attack"></div>
-        <div id="skill"></div>
+        <div class="attack" id="attack"></div>
+        <div class="skill" id="skill"></div>
     </div>
     
     <br>
 
-    <input type="button" value="Начать" onClick="begin()">
+    <input type="button" value="Начать" id="start" onClick="begin()">
 
     <script>
 
         hitChance = 10;
         
         hpEnemy = 3;
-        hitBoxRadiusEnemy = 24;
+        hitBoxRadiusEnemy = 36;
 
-        hitBoxRadiusSkill = 175/2;
+        hitBoxRadiusSkill = 35;
 
         turn = 3;
+        time = 0;
+
+        moveSpeed = 5;
 
         gabeOpacity = 0;
+        trollShift = 100;
+
+        startBool = false;
+        skillPressBool = false;
+        skillCd = false;
+        skillActive = false;
+
+        attackCd = false;
+
+        var timerId;
+
+        document.addEventListener('keydown', function (event) {
+            switch (event.code) {
+                case 'KeyA':
+                    attack();
+                    break;
+                case 'KeyD':
+                    skillPress();
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        document.getElementById("game").addEventListener("mousedown", function (event) {
+            skill(event);
+        })
+
 
         function begin() {
-            gabeOpacity += 0.01;
-            document.getElementById("gabe").style.opacity = gabeOpacity;
+            startBool = true;
+
+            document.getElementById("start").setAttribute("disabled", "disabled");
+
+            startMove();
         }
 
         function attack() {
 
-            chance = Math.random * 100;
+            console.log(turn);
+            console.log(attackCd);
 
-            if (chance <= hitChance) {
+            if (!attackCd && startBool) {
+                chance = Math.random() * 100;
 
-                hpEnemy--;
+                if (chance <= hitChance) {
+
+                    hpEnemy--;
+                    document.getElementById("hp").innerText = hpEnemy + " HP";
+
+                    document.getElementById("suc").style.opacity = 1;
+                    setTimeout(()=>{
+                        document.getElementById("suc").style.opacity = 0;
+                    }, 500);
+                } else {
+                    document.getElementById("miss").style.opacity = 1;
+                    setTimeout(()=>{
+                        document.getElementById("miss").style.opacity = 0;
+                    }, 500);
+                }
+
+                turn--;
+
+                document.getElementById("attack").classList.add("cd");
+
+                attackCd = true;
+                setTimeout(()=>{
+                    if (turn <= 0) {                        
+                        attackCd = true;
+                    } else {
+                        attackCd = false;
+                        document.getElementById("attack").classList.remove("cd");
+                    }
+                }, 1000);
             }
 
-            turn--;
-
-            if (turn <= 0) {
-                check();
-            }
+            
         }
 
-        function skill(xSkill, ySkill) {
+        
 
-            enemy = document.getElementById("enemy");
+        function skillPress() {
+            if (skillPressBool) {
+                skillPressBool = false;
+                document.getElementById("skill").classList.remove("press");
 
-            xEnemy = enemy.style.left;
-            yEnemy = enemy.style.top;
-
-            if (hitBoxRadiusSkill+hitBoxRadiusEnemy >= Math.sqrt((x-xEnemy)**2 + (y-yEnemy)**2)) {
-                hpEnemy--;
+            } else if (startBool && !skillCd) {
+                skillPressBool = true;
+                document.getElementById("skill").classList.add("press");
             }
 
-            turn--;
+        }
 
-            if (turn <= 0) {
-                check();
+        function skill(event) {
+            if (skillPressBool && !skillActive) {
+                skillCd = true;
+                skillActive = true;
+                document.getElementById("skill").classList.remove("press");
+                
+                xSkill = 0;
+                ySkill = 0;
+
+                enemy = document.getElementById("enemy");
+
+                xEnemy = enemy.offsetLeft;
+                yEnemy = enemy.offsetTop;
+
+                xSkill = event.clientX;
+                ySkill = event.clientY;
+
+                sun = document.getElementById("sun");
+
+                xSkillShift = xSkill - hitBoxRadiusSkill;
+                ySkillShift = ySkill - hitBoxRadiusSkill;
+
+                sun.style.left = xSkillShift+"px";
+                sun.style.top = ySkillShift+"px";
+
+                timerId = setTimeout(()=>{
+                    if (hitBoxRadiusSkill+hitBoxRadiusEnemy >= Math.sqrt((xSkill-xEnemy)**2 + (ySkill-yEnemy)**2)) {
+                        hpEnemy--;
+                        document.getElementById("hp").innerText = hpEnemy + " HP";
+                    }
+                    document.getElementById("sun").classList.add("hit");
+                }, 1700);
+
+                document.getElementById("skill").classList.add("cd");
             }
         }
 
@@ -94,48 +192,102 @@
 
             hitChance += 5;
             hpEnemy = 3;
+            skillPressBool = false;
+            time = 0;
+            turn = 3;
+            startBool = false;
+            skillCd = false;
+            attackCd = false;
+            skillActive = false;
 
-            document.getElementById("game").style.opacity += 0.05;
+
+            document.getElementById("attack").classList.remove("cd");
+            document.getElementById("skill").classList.remove("cd");
+            document.getElementById("skill").classList.remove("press");
+            document.getElementById("sun").classList.remove("hit");
+
+            document.getElementById("hp").innerText = hpEnemy + " HP";
+
+            enemy = document.getElementById("enemy");
+            enemy.style.left = "500px";
+            enemy.style.top = "400px";
+
+            sun = document.getElementById("sun");
+            sun.style.left = "-200px";
+            sun.style.top = "-200px";
+
+            gabeOpacity += 0.01;
+
+            if (trollShift > 10) {
+                trollShift -= 10;                 
+            }
+
+            document.getElementById("gabe").style.opacity = gabeOpacity;
+            document.getElementById("start").removeAttribute("disabled");
+
         }
 
         function win() {
-            
+            alert(`Ты как победил? Ладно, Отправь мне  "GG WP"`);
         }
 
-        function check(x, y) {
+        let moveId;
 
-            // for (let i = 0; i < 3; i++) {
-            //     val = test2(val);
-
-            // }
-
-            console.log(x * x - 6 * x + 19);
-
-            if (x ** 2 - 6 * x + 19 == 8 * (Math.log(y) / (Math.log(x ** (1 / 3)))) - Math.sqrt(2 * y) - 5)
-                document.getElementById('yeah').innerHTML = "Правильно! Отправь мне эти числа";
-            else
-                document.getElementById('yeah').innerHTML = "Неправильно";
-        }
-
-        function test2(val) {
-            var v = val * 132;
-
-            var len = v.toString().length;
-            console.log(v);
-            console.log(len);
-
-            var temp2 = 0
-            for (let i = 0; i < len; i++) {
-                var temp = v % 10;
-
-                temp2 += (temp % 2 == 0) ? temp * 3 : temp * 2;
-
-                v -= temp;
-                v /= 10;
+        function startMove() {
+            if (!moveId) {
+                moveSpeed = Math.random() * 10 + 5;
+                moveId = setInterval(move, 50);
+            } else {
+                stopMove();
             }
-            console.log(temp2);
+        }
 
-            return temp2 * val;
+        function move() {
+            enemy = document.getElementById("enemy");
+
+            time++;
+
+            if (skillPressBool) {
+                trollMove(enemy);
+            } else {
+                normalMove(enemy);
+            }
+
+            enemy.style.left = xEnemy+"px";
+            enemy.style.top = yEnemy+"px";
+
+            mbStop();
+        }
+
+        function mbStop() {
+            if (time >= 100) {
+                stopMove();
+            }
+        }
+
+        function stopMove() {
+            clearInterval(moveId);
+            moveId = null;
+            clearTimeout(timerId);
+            timerId = null;
+
+            check();
+        }
+
+        function normalMove(enemy) {
+            xEnemy = enemy.offsetLeft+ Math.random() * 5 + 5;
+            yEnemy = enemy.offsetTop;
+
+            enemy.style.left = xEnemy+"px";
+            enemy.style.top = yEnemy+"px";
+        }
+
+        function trollMove(enemy) {
+            xEnemy = enemy.offsetLeft + Math.random() * trollShift * 2 - trollShift;
+            yEnemy = enemy.offsetTop + Math.random() * trollShift * 2 - trollShift;    
+
+            enemy.style.left = xEnemy+"px";
+            enemy.style.top = yEnemy+"px";
         }
 
     </script>
