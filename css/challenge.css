@@ -1,0 +1,102 @@
+body {
+    font-weight: bold;
+    font-family: "Gill Sans", sans-serif;
+
+    background: #3a3231;
+    color:#448fff;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+
+    height: 844px;
+}
+
+.timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 250px;
+    height: 150px;
+
+    color: #ffffff;
+    border: 4px #448fff solid;
+    border-radius: 20px;
+
+    font-size: 50pt;
+}
+
+.seconds {
+    font-size: 35pt;
+}
+
+.result {
+    font-size: 70pt;
+}
+
+button {
+    width: 300px;
+    height: 400px;
+
+    font-size: 40pt;
+    font-family: "Gill Sans", sans-serif;
+    font-weight: bold;
+
+    background: #448fff;
+    color :#ffffff;
+
+
+    border: 0px ;
+    border-radius: 20px;
+
+    opacity: 0.8;
+}
+
+button:hover {
+    cursor: pointer;
+    opacity: 1;
+}
+
+button:disabled {
+    background: #beddff;
+    color :#3777d6;
+
+    opacity: 1;
+}
+
+button:disabled:hover {
+    cursor: default;
+}
+
+.levels {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    font-size: 15pt;
+}
+
+.level button {
+    width: 50px;
+    height: 50px;
+
+    font-size: 15pt;
+}
+
+.level .active {
+    background: #79e6bc;
+    color: #082757;
+    opacity: 1;
+    cursor: default;
+}
+
+.level .lock {
+    background: #a5502f;
+    opacity: 1;
+    cursor: default;
+}
