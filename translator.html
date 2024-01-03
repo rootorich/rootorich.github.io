@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AAAAAAAAA</title>
+
+    <style>
+        body {
+            background: rgb(30,30,30);
+            color: rgb(65, 118, 93);
+
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-size: 16pt;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            margin-top: 50px;
+
+            font-size: 20pt;
+            font-weight: bold;
+        }
+
+        textarea {
+            margin-top: 20px;
+
+            background: rgb(40,40,40);
+            border: 1px solid rgb(65, 118, 93);
+
+            font-size: 16pt;
+            color: rgb(65, 118, 93);
+        }
+
+        textarea:focus-visible {
+            outline: 2px solid rgb(65, 118, 93);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+
+            width: 500px;
+
+            margin-top: 20px;
+        }
+
+        button {
+            width: 200px;
+            height: 50px;
+
+            background: rgb(40,40,40);
+            border: 1px solid rgb(65, 118, 93);
+
+            font-size: 16pt;
+            color: rgb(65, 118, 93);
+        }
+
+        button:hover {
+            border: 3px solid rgb(65, 118, 93);
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+    <main>
+        <div id="header" class="header">Переводчик</div>
+        <textarea id="text" cols="100" rows="10"></textarea>
+        <div class="buttons">
+            <!-- <button onclick="EngToCode()">Eng->Crypt</button> -->
+            <!-- <button onclick="CodeToEng()">Crypt->Eng</button> -->
+            <button onclick="RuToCode()">Зашифровать</button>
+            <button onclick="CodeToRu()">Расшифровать</button>
+            
+        </div>
+        <div id="header" class="header">Результат</div>
+        <textarea id="result" class="result" cols="100" rows="10" readonly></textarea>
+    </main>
+
+    <script>
+
+        // first version
+        function EngToCode() {
+            text = document.getElementById("text").value
+            console.log(text)
+            let temp = ""
+            for (let i = 0; i < text.length; i++) {
+                char = text[i].charCodeAt(0)
+                console.log(char)
+
+                char = char.toString(2);
+                while (char.length < 8) {
+                    char = '0' + char
+                }
+                
+
+                temp = temp + char
+                console.log(temp)
+            }
+
+            temp = temp.replaceAll('0', 'a')
+            temp = temp.replaceAll('1', 'A')
+
+            result = document.getElementById("result")
+            
+            result.value = temp
+
+        }
+
+        //first version
+        function CodeToEng() {
+            text = document.getElementById("text").value
+            console.log(text)
+
+            text = text.replaceAll('a', '0')
+            text = text.replaceAll('A', '1')
+
+            temp = ""
+
+            for (let i = 0; i < text.length; i += 8) {
+                t = text.substring(i, i + 8)
+                t = parseInt(t, 2)
+                temp += String.fromCharCode(t)
+            }            
+
+            result = document.getElementById("result")
+            
+            result.value = temp
+
+        }
+
+        //second version (add rus)
+        function RuToCode() {
+            text = document.getElementById("text").value
+            console.log(text)
+            let temp = ""
+            let small_a = 'а'.charCodeAt(0)
+            let big_a = 'А'.charCodeAt(0)
+            for (let i = 0; i < text.length; i++) {
+
+                char = text[i].charCodeAt(0)
+                if (char < 1072 && char > 1000) {
+                    char = text[i].charCodeAt(0) - big_a + 128
+                } else if (char >= 1072) {
+                    char = text[i].charCodeAt(0) - small_a + 128 + 64
+                } else {
+                    char = text[i].charCodeAt(0)
+                }
+                console.log(char)
+
+                char = char.toString(2);
+                while (char.length < 8) {
+                    char = '0' + char
+                }
+
+                temp = temp + char
+                console.log(temp)
+            }
+
+            temp = temp.replaceAll('0', 'a')
+            temp = temp.replaceAll('1', 'A')
+
+            result = document.getElementById("result")
+            
+            result.value = temp
+
+        }
+
+        //second version (add rus)
+        function CodeToRu() {
+            text = document.getElementById("text").value
+            console.log(text)
+
+            text = text.replaceAll('a', '0')
+            text = text.replaceAll('A', '1')
+
+            temp = ""
+            let small_a = 'а'.charCodeAt(0)
+            let big_a = 'А'.charCodeAt(0)
+            
+            for (let i = 0; i < text.length; i += 8) {
+                t = text.substring(i, i + 8)
+                t = parseInt(t, 2)
+                if (t < 192 && t > 127) {
+                    t = t - 128 + big_a
+                } else if (t >= 192) {
+                    t = t - 128 - 64 + small_a
+                }
+                temp += String.fromCharCode(t)
+            }            
+
+            result = document.getElementById("result")
+            
+            result.value = temp
+
+        }
+    
+    </script>
+
+</body>
+
+</html>
