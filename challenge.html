@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+        <title>Challenge</title>
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/challenge.css" rel="stylesheet">
+
+    </head>
+
+    <body>
+        <main>
+
+            <div class="levels" id="level">
+                <span>Уровни</span>
+
+                <div class="level">
+                    <button id="lvl-1" onclick="ChangeLevel(1)" class="active">15</button>
+                    <button id="lvl-2" onclick="ChangeLevel(2)">30</button>
+                    <button id="lvl-3" onclick="ChangeLevel(3)">60</button>
+                </div>
+            </div>
+
+            <div class="timer" id="timer">
+                <div id="time">0.0</div>
+                <div class="seconds">секунд</div>
+            </div>
+
+            <div class="result" id="result">ЖМИ</div>
+
+            <button id="button" onclick="Timer()">Готов</button>
+
+        </main>
+
+        <script>
+            time = 0;
+            maxTime = 15;
+
+            lock = false;
+
+            function ChangeLevel(lvl) {
+                if (!lock) {
+                    maxTime = Math.pow(2, lvl - 1) * 15;
+
+                    for (let i = 1; i <= 3; i++) {
+                        document.getElementById(`lvl-${i}`).removeAttribute("class");
+                    }
+
+                    document.getElementById(`lvl-${lvl}`).setAttribute("class", "active");
+                }
+            }
+
+            function Timer() {
+                LockTimer();
+                MyRandom();
+
+                intervalId = setInterval(() => {
+                    time -= 0.1;
+                    time = Math.round(time * 10) / 10;
+
+                    if (Math.floor(time) == time) {
+                        document.getElementById("time").textContent = time + ".0";
+                    } else {
+                        document.getElementById("time").textContent = time;
+                    }
+
+                    if (time <= 0) {
+                        UnlockTimer();
+                        clearInterval(intervalId)
+                    }
+                }, 100);
+
+                document.getElementById("time").textContent = "0.0";
+            }
+
+            function MyRandom() {
+                result = Math.floor(Math.random() * 2);
+
+                if (result) {
+                    document.getElementById("result").textContent = "ДА";
+                } else {
+                    document.getElementById("result").textContent = "НЕТ";
+                }
+            }
+
+            function UnlockTimer() {
+                document.getElementById("button").removeAttribute("disabled");
+                document.getElementById("button").textContent = "Готов";
+
+                document.getElementById("result").textContent = "ЖМИ";
+
+            }
+
+            function LockTimer() {
+                time = maxTime;
+
+                document.getElementById("button").setAttribute("disabled", "disabled");
+                document.getElementById("button").textContent = "Не готов";
+
+                LockLevel();
+            }
+
+            function LockLevel() {
+                lock = true;
+                for (let i = 1; i <= 3; i++) {
+                    if (!document.getElementById(`lvl-${i}`).hasAttribute("class")) {
+                        document.getElementById(`lvl-${i}`).setAttribute("class", "lock");
+                    }
+                }
+            }
+
+        </script>
+    </body>
+</html>
