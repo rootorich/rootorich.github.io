@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+
+            background-color: rgb(30, 30, 30);
+            color:rgb(126, 126, 126);
+            font-size: 16pt;
+
+        }
+
+        body>dl>dt {
+            display: none;
+        }
+
+        dt:hover {
+            cursor: pointer;
+        }
+
+
+
+        @media screen and (max-width: 450px) {
+            body {
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id="input">
+        <input type="text" id="code" placeholder="Код">
+        <button onclick="Decode()">Получить правила</button>
+    </div>
+    <!-- <div id="rules"> -->
+    <dl id="general">
+        <dt id="general_dt">Основные правила</dt>
+    </dl>
+
+    <dl id="card">
+        <dt id="card_dt">Правила карт</dt>
+    </dl>
+    <!-- </div> -->
+
+
+
+
+
+    <script>
+
+        class Game {
+
+            constructor() {
+
+                this.settings = new Map();
+
+                this.propertysGeneral = [
+                    "order",
+                    "monolog",
+                    "golosovanie",
+                    "win",
+                    "foul",
+                    "mafia_choose",
+                    "termin"
+
+                ];
+
+                this.propertysGeneralNames = [
+                    "Порядок Игры",
+                    "Монологи",
+                    "После Монологов",
+                    "Условия победы",
+                    "Фолы",
+                    "Выбор жертвы Мафии",
+                    "Некоторые термины"
+
+                ];
+
+                this.propertysCards = [
+                    "type",
+                    "mafia_simple",
+                    "boss",
+                    "isheika",
+                    "advokat",
+
+                    "maniak",
+                    "otravitel",
+                    "poklonnica",
+
+                    "patrulniy",
+                    "detective",
+                    "sichick",
+                    "sudia",
+                    "jurnalist",
+                    "doctor",
+
+                    "vezunchik",
+                    "mstitel",
+
+                    "mirniy"
+
+                ];
+                
+                this.propertysCardsNames = [
+                    "Тип игры",
+                    "Мафия",
+                    "Босс",
+                    "Ищейка",
+                    "Адвокат",
+
+                    "Маньяк",
+                    "Отравитель",
+                    "Поклонница",
+
+                    "Патрульный",
+                    "Детектив",
+                    "Сыщик",
+                    "Судья",
+                    "Журналист",
+                    "Доктор",
+
+                    "Везунчик",
+                    "Мститель",
+
+                    "Мирный"
+
+                ];
+                // set base general rules
+                this.baseGeneral = new Map();
+
+                this.propertysGeneral.forEach(el => {
+                    this.baseGeneral.set(el, []);
+                });
+                //console.log(this.baseGeneral);
+                this.SetBaseGeneral();
+
+                this.ShowRule(this.baseGeneral, this.propertysGeneral, this.propertysGeneralNames, "general", 0);
+
+                // set base card rules
+                this.baseCards = new Map();
+
+                this.propertysCards.forEach(el => {
+                    this.baseCards.set(el, []);
+                });
+                //console.log(this.baseCards);
+                this.SetBaseCards();
+            }
+
+            Parser(code) {
+                //console.log("Parser start");
+                let arr_code = [];
+
+                code = code.split("");
+
+                let mul = 0;
+
+                code.forEach(el => {
+                    let temp_el = null;
+                    if (el >= 'a' && el <= 'z') {
+                        temp_el = el.charCodeAt(0) - 'a'.charCodeAt(0);
+                    } else if (el >= 'A' && el <= 'Z') {
+                        temp_el = el.charCodeAt(0) - 'A'.charCodeAt(0) + 26;
+                    } else if (el >= '0' && el <= '9') {
+                        mul = el.charCodeAt(0) - '0'.charCodeAt(0) + mul * 10;
+                        // temp_el = el.charCodeAt(0) - '0'.charCodeAt(0);
+                    }
+
+                    if (temp_el != null) {
+                        temp_el = temp_el.toString(2);
+                        temp_el = temp_el.split("");
+                        temp_el = temp_el.reverse();
+                        for (let i = 0; i < temp_el.length; i++) {
+                            temp_el[i] = (temp_el[i] == '1') ? 1 : 0;
+                        }
+                        for (let i = temp_el.length; i < 5; ++i) {
+                            temp_el.push(0);
+                        }
+
+                        if (mul == 0) {                        
+                            arr_code.push(temp_el);
+                        } else {
+                            for (let i = 0; i < mul; ++i) {
+                                arr_code.push(temp_el);
+                            }
+                            mul = 0;
+                        }
+
+                        temp_el = null;
+                    }
+
+                    
+                });
+
+                this.code = arr_code;
+            }
+
+            Switcher(code) {
+                this.Parser(code);
+
+                for (let i = 0; i < this.propertysCards.length; i++) {
+                    this.settings.set(this.propertysCards[i], this.code[i]);
+                    
+                }
+
+                let main = document.getElementById("card_div");
+
+                if (main) {
+                    main.remove();
+                }
+
+                this.ShowRule(this.baseCards, this.propertysCards, this.propertysCardsNames, "card", 1);
+            }
+
+            AddToggleEvent(master, slave) {
+                master.addEventListener("click", () => {
+                        let el = document.getElementById(slave + "_div");
+                        if (el.style.display == "none") {
+                            el.style.display = "block";
+                        } else {
+                            el.style.display = "none";
+                        }
+                    });
+            }
+
+            Check(arr) {
+                let is_find = 0;
+                if (arr) {
+                    arr.forEach(el => {
+                        if (el) {
+                            is_find = 1;
+                        }
+                    });
+                }
+                
+                return is_find
+            }
+
+            ShowRule(base, propertys, names, main_id, is_settings) {
+                console.log(document);
+                let main = document.getElementById(main_id);
+                console.log(main);
+
+                document.getElementById(main_id + "_dt").style.display = "block";
+
+                let main_div = document.createElement("div");
+                main_div.id = main_id + "_div";
+
+                console.log(propertys);
+
+                for (let i = 0; i < propertys.length; i++) {
+                    const prop = propertys[i];
+                    
+                    let data = base.get(prop);
+
+                    // console.log(data);
+
+                    if (is_settings) {
+                        console.log("is_setting is ok for " + prop);
+                        if (this.Check(this.settings.get(prop))) {
+                            console.log("check is done");
+                            let main_dd = document.createElement("dd");
+
+                            let dl = document.createElement("dl");
+
+                            let dt = document.createElement("dt");
+                            dt.innerHTML = names[i];
+                            dt.id = prop;
+                            
+                            dl.appendChild(dt);
+
+                            let div = document.createElement("div");
+                            for (let j = 0; j < this.settings.get(prop).length; ++j) {
+                                const sett = this.settings.get(prop)[j];
+                                console.log(sett);
+                                if(sett) {
+                                    let dd = document.createElement("dd");
+                                    dd.innerHTML = base.get(prop)[j];
+                                    div.appendChild(dd);
+                                }
+                            }
+
+                            div.id = prop + "_div";
+                            div.style.display = "none";
+                            
+                            dl.appendChild(div);
+
+                            main_dd.appendChild(dl);
+
+                            main_div.appendChild(main_dd);
+                        }
+                    } else {
+                        let main_dd = document.createElement("dd");
+
+                        let dl = document.createElement("dl");
+
+                        let dt = document.createElement("dt");
+                        dt.innerHTML = names[i];
+                        dt.id = prop;
+
+                        dl.appendChild(dt);
+
+                        let div = document.createElement("div");
+
+                        data.forEach(el => {
+                            let dd = document.createElement("dd");
+                            dd.innerHTML = el;
+                            div.appendChild(dd);
+                        });
+
+                        div.id = prop + "_div";
+                        div.style.display = "none";
+                        
+                        dl.appendChild(div);
+
+                        main_dd.appendChild(dl);
+
+                        main_div.appendChild(main_dd);
+
+                    }
+                }
+
+                main.appendChild(main_div);
+
+                propertys.forEach(prop => {
+                    if (is_settings) {
+                        if (this.Check(this.settings.get(prop))) {
+                            this.AddToggleEvent(document.getElementById(prop), prop);
+                        }
+                    } else {
+                        this.AddToggleEvent(document.getElementById(prop), prop);
+                    }
+                });
+
+                this.AddToggleEvent(document.getElementById(main_id + "_dt"), main_id);
+            }
+
+            SetBaseGeneral() {
+                this.PushToBase(this.baseGeneral, "order", "Игра делится на 4 временных промежутка: день, вечер, ночь, утро.");
+                this.PushToBase(this.baseGeneral, "order", "Днём игроки могут свободно разговаривать с друг другом на любые темы не нарушающие правил.");
+                this.PushToBase(this.baseGeneral, "order", 'Вечером начинаются монологи (подробнее в разделе "Монологи").');
+                this.PushToBase(this.baseGeneral, "order", 'Ночью игроки имеющие способности просыпаются по команде ведущего. Можно отказаться от действий в текущую ночь (жест "Крест"), если игрок того желает.');
+                this.PushToBase(this.baseGeneral, "order", "Утром объявляются результаты ночи: убийства и другая информация, если об этом сказано в правилах карт.");
+
+                this.PushToBase(this.baseGeneral, "monolog", "Во время монолога игрок может говорить на любую тему за отведённое ему время. По желанию игрока монолог можно пропустить.");
+                this.PushToBase(this.baseGeneral, "monolog", 'Во время монолога обязательно нужно отдать так называемый "палец" (голос) в того игрока, который потенциально должен покинуть игру.');
+                this.PushToBase(this.baseGeneral, "monolog", 'Если не успеть отдать "палец" в игрока за отведённое время, начнётся обратный отсчёт на несколько секунд. В это время игрок может сказать только имя игрока, в которого полетит "палец".');
+                this.PushToBase(this.baseGeneral, "monolog", 'Если не успеть отдать "палец" за обратный отсчёт, то считается, что "палец" игрок дал самому себе.');
+                this.PushToBase(this.baseGeneral, "monolog", "Одновременно монолог может вести только один человек. Любой игрок по желанию (первый пожелавший, если таких несколько) начинает монолог.");
+                this.PushToBase(this.baseGeneral, "monolog", "После первого монолога игрок решает, в каком направлении пойдут все следующие монологи (слева или справа от него).");
+
+                this.PushToBase(this.baseGeneral, "golosovanie", 'Игрок набравший наибольшее количество "пальцев" (он же кандидат) выходит на оправдание (дополнительный монолог). На оправдание могут выйти несколько человек, если несколько игроков набрали одинаковое наибольшее количество голосов.');
+                this.PushToBase(this.baseGeneral, "golosovanie", "Если на оправдании был всего один игрок, то игроки могут поднять руку за то, чтобы оправдать кандидата. Если набрано больше половины голосов от всех живых голосующих, то игрок оправдан, иначе считается повешеным.");
+                this.PushToBase(this.baseGeneral, "golosovanie", "Если на оправдании было несколько человек, то игроки отдают свой голос за повешение. Можно проголосовать только против одного игрока. Если какой-то игрок не голосовал вообще, считается, что он проголосовал в последнего кандидата.");
+                this.PushToBase(this.baseGeneral, "golosovanie", "Кандидаты тоже могут голосовать, если их количество больше двух, иначе их голоса не учитываются.");
+
+                this.PushToBase(this.baseGeneral, "win", "Мафия побеждает, если они остались в соотношении 1:1 с теми, кто не может их убить (например, 3 Мафии, Доктор и 2 Мирных).");
+                this.PushToBase(this.baseGeneral, "win", "Одиночка побеждает, если остаётся в соотношении 1:1 с теми, кто может его убить, или 1:2 с теми, кто не может его убить (например, Одиночка и Мафия, или Одиночка и 2 Мирных).");
+                this.PushToBase(this.baseGeneral, "win", "Мирные побеждают, если нет Мафий и Одиночек.");
+                
+                this.PushToBase(this.baseGeneral, "foul", "Фолы - дополнительный способ покинуть игру, если игрок нарушает правила игры. Если игрок в течении одной игры получит 4 фола, то ведущий объявит его мёртвым и вскроет карту, если игра - открытая.");
+                this.PushToBase(this.baseGeneral, "foul", "Игрок получает 1 фол, если: матерится, оскорбляет игрока (ведущий может дать больше одного фола), поднимает политические, религиозные или любые другие социальные темы.");
+                this.PushToBase(this.baseGeneral, "foul", "Игрок также получает 1 фол, если: перебивает игрока (например, любые звуки), говорит о ночных действиях (всё, что было ночью, не обсуждается).");
+                this.PushToBase(this.baseGeneral, "foul", "Игрок получает 4 фола, если: покажет кому-нибудь свою карту, подсмотрит чужую карту, проснётся не в свою роль ночью, будет подсматривать ночью, будет жестикулировать ночью не в свою роль.");
+
+                this.PushToBase(this.baseGeneral, "mafia_choose", "Вся живая мафия должна выбрать одну жертву единогласно. Для этого им выдаётся около 15 секунд. Ведущий будет уточнять выбор мафии подходя к выбранному игроку.");
+                this.PushToBase(this.baseGeneral, "mafia_choose", "Если Мафия согласна с выбором остальной Мафии, то можно показать палец вверх.");
+                this.PushToBase(this.baseGeneral, "mafia_choose", "Если за отведённое время Мафия не смогла выбрать всего одну жертву единогласно (хотя бы одна из Мафий, показывала на другого игрока), то Мафия засыпает никого не убив.");
+                this.PushToBase(this.baseGeneral, "mafia_choose", 'Если хотя бы одна из Мафий показала жест "Крест", то она отказалась от выстрела за всю Мафию.');
+
+                this.PushToBase(this.baseGeneral, "termin", "Термины и жесты используются для обобщения и упрощения передачи информации. Жесты чаще всего используются во время чужих монологов или ночью.");
+                this.PushToBase(this.baseGeneral, "termin", "Красный (жест - большой палец вверх) - какой-то их мирных.");
+                this.PushToBase(this.baseGeneral, "termin", "Чёрный (жест - большой палец вниз) - какой-то из плохих.");
+                this.PushToBase(this.baseGeneral, "termin", "Серый (жест - движение большим палецем вверх-вниз либо просто в сторону) - неуверенность в цвете.");
+                this.PushToBase(this.baseGeneral, "termin", 'Вопрос (что?, кто?, почему?,...) (жест - указательным и большим пальцами или всеми пальцами форма похожая на символ "?").');
+                this.PushToBase(this.baseGeneral, "termin", "Детектив (жест - ОК (жетон детектива)). Патрульный (жест - пистолет). Доктор (жест - плюс).");
+
+            }
+
+            SetBaseCards() {
+                let temp_rule;
+
+                this.PushToBase(this.baseCards, "type", "Закрытая - Дневное повешение не вскрывает карту игрока. После любой смерти есть предсмертная речь.");
+                this.PushToBase(this.baseCards, "type", "Открытая - Дневное повешение вскрывает карту игрока. Ночные убийства не вскрывают карту игрока (бывают исключения у некоторых карт).");
+
+                temp_rule = " Мафия(-ии/ий) без дополнительных способностей"
+                for (let i = 1; i <= 5; ++i) {
+                    this.PushToBase(this.baseCards, "mafia_simple", `${i}` + temp_rule);
+                }
+
+                this.PushToBase(this.baseCards, "boss", "Мафия.");
+                this.PushToBase(this.baseCards, "boss", "Проверяется мирным.");
+                this.PushToBase(this.baseCards, "boss", 'Ищет Везунчика. Если находит, ведущий покажет палец вверх. Иначе покажет знак "Крест".');
+
+                this.PushToBase(this.baseCards, "isheika", "Мафия.");
+                this.PushToBase(this.baseCards, "isheika", 'Ищет Детектива. Если нашли, ведущий покажет знак детектива. Иначе покажет знак "Крест".');
+                this.PushToBase(this.baseCards, "isheika", 'Ищет Патрульного. Если нашли, ведущий покажет знак Патрульного. Иначе покажет знак "Крест".');
+                this.PushToBase(this.baseCards, "isheika", 'Ищет Судью. Если нашли, ведущий покажет знак Судьи. Иначе покажет знак "Крест".');
+
+                this.PushToBase(this.baseCards, "advokat", "Мафия.");
+                this.PushToBase(this.baseCards, "advokat", "Защищает от повешения.");
+                this.PushToBase(this.baseCards, "advokat", "Меняет результат дневного приговора.");
+                this.PushToBase(this.baseCards, "advokat", "Ищет Судью. Если находит, то блокирует его способность. Ни Судья, ни Адвокат не знают о блокировке.");
+
+                this.PushToBase(this.baseCards, "maniak", "Одиночка.");
+                this.PushToBase(this.baseCards, "maniak", "Убивает.");
+                this.PushToBase(this.baseCards, "maniak", "Проверяется мирным для детективка.");
+                this.PushToBase(this.baseCards, "maniak", "Детектив умирает от проверки.");
+
+                this.PushToBase(this.baseCards, "otravitel", "Одиночка.");
+                this.PushToBase(this.baseCards, "otravitel", "Убивает.");
+                this.PushToBase(this.baseCards, "otravitel", "Игнорирует лечение.");
+                this.PushToBase(this.baseCards, "otravitel", "Убийство  озвучивается перед следующей ночью.");
+                this.PushToBase(this.baseCards, "otravitel", "Убийство  озвучивается перед повешением.");
+                
+                this.PushToBase(this.baseCards, "poklonnica", "Выбирает любимчика.");
+                this.PushToBase(this.baseCards, "poklonnica", "Если любимчик жив, играет за город. Если мёртв, то становится одиночкой и убивает каждую ночь.");
+                this.PushToBase(this.baseCards, "poklonnica", "Играет за команду любимчика. Если любимчика должны убить ночью, то спасает его, жертвуя собой. Если любимчика повесили, то самоубивается следующей ночью.");
+                this.PushToBase(this.baseCards, "poklonnica", "Любимчик это Маньяк. Друг друга не знают, но играют в одной команде. Если Маньяк умрёт, то начинает убивать.");
+                this.PushToBase(this.baseCards, "poklonnica", "Пока любимчик жив, проверяется мирным. Если мёртв - то проверяется собой.");
+
+                this.PushToBase(this.baseCards, "patrulniy", "Мирный.");
+                this.PushToBase(this.baseCards, "patrulniy", "Убивает.");
+                this.PushToBase(this.baseCards, "patrulniy", "Убийство расскрывает роль жертвы.");
+                this.PushToBase(this.baseCards, "patrulniy", "Знает Детектива.");
+
+                this.PushToBase(this.baseCards, "detective", "Мирный.");
+                this.PushToBase(this.baseCards, "detective", "Проверяет цвет. Ночью ведущий покажет большим пальцем вверх, если игрок против мирных, и пальцем вниз, если игрок за мирных.");
+                this.PushToBase(this.baseCards, "detective", "Проверяет роль. Проверка озвучивается ведущим после объявления всех ночных убийств.");
+
+                this.PushToBase(this.baseCards, "sichick", "Мирный.");
+                this.PushToBase(this.baseCards, "sichick", "Перенимает способности Патрульного и/или Детектива после их смерти.");
+
+                this.PushToBase(this.baseCards, "sudia", "Мирный.");
+                this.PushToBase(this.baseCards, "sudia", "Садит в тюрьму мафию. Посаженный в тюрьму считается мёртвым. Нельзя спасти игрока лечением.");
+
+                this.PushToBase(this.baseCards, "jurnalist", "Мирный.");
+                this.PushToBase(this.baseCards, "jurnalist", "Исследует игрока. Если любой из исследуемых ранее игроков умер, пока жив Журналист, то роль вскрывается в любом случае.");
+                this.PushToBase(this.baseCards, "jurnalist", "Проверяет двоих. Если оба одновременно красные или одновременно чёрные и/или серые, то ведущий покажет палец вверх. Если один красные, а другой чёрный/серый, то покажут палец вниз.");
+                
+                this.PushToBase(this.baseCards, "doctor", "Мирный.");
+                this.PushToBase(this.baseCards, "doctor", "Лечит любого игрока (даже самого себя) от убийства. Нельзя лечить одного и того же игрока две ночи ПОДРЯД (через ночь можно).");
+
+                this.PushToBase(this.baseCards, "vezunchik", "Мирный.");
+                this.PushToBase(this.baseCards, "vezunchik", "Не может умереть.");
+                this.PushToBase(this.baseCards, "vezunchik", "Умирает только от одиночек.");
+                this.PushToBase(this.baseCards, "vezunchik", "Имеет две жизни.");
+                this.PushToBase(this.baseCards, "vezunchik", "Умерает с двух выстрелов (может быть в одну ночь).");
+
+                this.PushToBase(this.baseCards, "mstitel", "Мирный");
+                this.PushToBase(this.baseCards, "mstitel", "Если умрёт, убивает любого игрока независимо от его способностей");
+
+                temp_rule = " Мирный(-ых/ий) без дополнительных способностей"
+                for (let i = 1; i <= 5; ++i) {
+                    this.PushToBase(this.baseCards, "mirniy", `${i}` + temp_rule);
+                
+                }
+
+                console.log(this.baseCards);
+                
+            }
+
+            PushToBase(base, key, value) {
+                let res = base.get(key);
+                res.push(value);
+                base.set(key, res);
+            }       
+
+            settings;
+            
+            propertysCards;
+            propertysGeneral;
+
+            propertysCardsNames;
+            propertysGeneralNames;            
+            
+            baseCards;
+            baseGeneral;
+
+            code;
+            
+        }
+
+        var game = new Game();
+
+        function Decode() {
+            code = document.getElementById("code").value;
+            game.Switcher(code);
+        }
+
+    </script>
+
+</body>
+
+</html>
