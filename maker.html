@@ -153,6 +153,7 @@
 
                     "maniak",
                     "otravitel",
+                    "revolutsioner",
                     "poklonnica",
 
                     "patrulniy",
@@ -178,6 +179,7 @@
 
                     "Маньяк",
                     "Отравитель",
+                    "Революционер",
                     "Поклонница",
 
                     "Патрульный",
@@ -386,7 +388,7 @@
 
                 this.PushToBase(this.baseCards, "boss", "Мафия.");
                 this.PushToBase(this.baseCards, "boss", "Проверяется мирным.");
-                this.PushToBase(this.baseCards, "boss", 'Ищет Везунчика. Если находит, ведущий покажет палец вверх. Иначе покажет знак "Крест".');
+                this.PushToBase(this.baseCards, "boss", 'Ищет Везунчика. Если находит, ведущий покажет палец вверх, а везунчик умрёт. Иначе покажет знак "Крест". Если Мафия стреляет в везунчика, то Босс умирает.');
 
                 this.PushToBase(this.baseCards, "isheika", "Мафия.");
                 this.PushToBase(this.baseCards, "isheika", 'Ищет Детектива. Если нашли, ведущий покажет знак детектива. Иначе покажет знак "Крест".');
@@ -409,7 +411,13 @@
                 this.PushToBase(this.baseCards, "otravitel", "Убийство  озвучивается перед следующей ночью.");
                 this.PushToBase(this.baseCards, "otravitel", "Убийство  озвучивается перед повешением.");
                 
-                this.PushToBase(this.baseCards, "poklonnica", "Выбирает любимчика.");
+                this.PushToBase(this.baseCards, "revolutsioner", "Одиночка.");
+                this.PushToBase(this.baseCards, "revolutsioner", "Убивает.");
+                this.PushToBase(this.baseCards, "revolutsioner", "Убийство отключает способность Мстителя.");
+                this.PushToBase(this.baseCards, "revolutsioner", "Игнорирует способность Везунчика.");
+                this.PushToBase(this.baseCards, "revolutsioner", "Выстрел в Везунчика считается за 2 выстрела.");
+
+                this.PushToBase(this.baseCards, "poklonnica", "Выбирает любимчика на всю игру в ночь знакомств.");
                 this.PushToBase(this.baseCards, "poklonnica", "Если любимчик жив, играет за город. Если мёртв, то становится одиночкой и убивает каждую ночь.");
                 this.PushToBase(this.baseCards, "poklonnica", "Играет за команду любимчика. Если любимчика должны убить ночью, то спасает его, жертвуя собой. Если любимчика повесили, то самоубивается следующей ночью.");
                 this.PushToBase(this.baseCards, "poklonnica", "Любимчик это Маньяк. Друг друга не знают, но играют в одной команде. Если Маньяк умрёт, то начинает убивать.");
@@ -417,12 +425,13 @@
 
                 this.PushToBase(this.baseCards, "patrulniy", "Мирный.");
                 this.PushToBase(this.baseCards, "patrulniy", "Убивает.");
-                this.PushToBase(this.baseCards, "patrulniy", "Убийство расскрывает роль жертвы.");
+                this.PushToBase(this.baseCards, "patrulniy", "Убийство расскроет роль жертвы утром.");
                 this.PushToBase(this.baseCards, "patrulniy", "Знает Детектива.");
 
                 this.PushToBase(this.baseCards, "detective", "Мирный.");
-                this.PushToBase(this.baseCards, "detective", "Проверяет цвет. Ночью ведущий покажет большим пальцем вверх, если игрок против мирных, и пальцем вниз, если игрок за мирных.");
+                this.PushToBase(this.baseCards, "detective", "Проверяет цвет. Ночью ведущий покажет большим пальцем вниз, если игрок против мирных, и пальцем вверх, если игрок за мирных.");
                 this.PushToBase(this.baseCards, "detective", "Проверяет роль. Проверка озвучивается ведущим после объявления всех ночных убийств.");
+                this.PushToBase(this.baseCards, "detective", "Знает Патрульного.");
 
                 this.PushToBase(this.baseCards, "sichick", "Мирный.");
                 this.PushToBase(this.baseCards, "sichick", "Перенимает способности Патрульного и/или Детектива после их смерти.");
@@ -433,6 +442,7 @@
                 this.PushToBase(this.baseCards, "jurnalist", "Мирный.");
                 this.PushToBase(this.baseCards, "jurnalist", "Исследует игрока. Если любой из исследуемых ранее игроков умер, пока жив Журналист, то роль вскрывается в любом случае.");
                 this.PushToBase(this.baseCards, "jurnalist", "Проверяет двоих. Если оба одновременно красные или одновременно чёрные и/или серые, то ведущий покажет палец вверх. Если один красные, а другой чёрный/серый, то покажут палец вниз.");
+                this.PushToBase(this.baseCards, "jurnalist", "При проверки универсального и любого другого ведущий покажет палец вверх.");
                 
                 this.PushToBase(this.baseCards, "doctor", "Мирный.");
                 this.PushToBase(this.baseCards, "doctor", "Лечит любого игрока (даже самого себя) от убийства. Нельзя лечить одного и того же игрока две ночи ПОДРЯД (через ночь можно).");
@@ -441,7 +451,7 @@
                 this.PushToBase(this.baseCards, "vezunchik", "Не может умереть.");
                 this.PushToBase(this.baseCards, "vezunchik", "Умирает только от одиночек.");
                 this.PushToBase(this.baseCards, "vezunchik", "Имеет две жизни.");
-                this.PushToBase(this.baseCards, "vezunchik", "Умерает с двух выстрелов (может быть в одну ночь).");
+                this.PushToBase(this.baseCards, "vezunchik", "Умирает с трёх выстрелов (может быть в одну ночь).");
 
                 this.PushToBase(this.baseCards, "mstitel", "Мирный");
                 this.PushToBase(this.baseCards, "mstitel", "Если умрёт, убивает любого игрока независимо от его способностей");
