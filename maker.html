@@ -35,6 +35,9 @@
         .block {
             display: flex;
             flex-direction: column;
+
+            margin-bottom: 25px;
+
         }
 
         .item {
@@ -47,11 +50,18 @@
 
         }
 
+        .item:hover {
+            cursor: pointer;
+            border: 2px rgb(255, 140, 0) solid;
+
+            color:rgb(137, 137, 137);
+        }
+
         .title {
+            text-align: center;
+
             width: 200px;
-
             margin: 5px;
-
             border: 2px red solid;
         }
 
@@ -64,6 +74,7 @@
         }
 
         .code {
+            display: inline-block;
             width: 300px;
             height: 50px;
 
@@ -90,10 +101,77 @@
         }
 
         button:hover {
-            border: 3px rgb(255, 98, 0) solid;
+            border: 3px rgb(255, 140, 0) solid;
 
             color:rgb(137, 137, 137);
 
+        }
+
+        .result {
+            position: relative;
+        }
+
+        .gg-copy {
+            box-sizing: border-box;
+            position: absolute;
+            top: 45px;
+            right: -30px;
+
+            display: inline-block;
+            transform: scale(var(--ggs,2));
+            width: 14px;
+            height: 18px;
+            border: 2px solid;
+        }
+
+        .gg-copy::after,
+        .gg-copy::before {
+            content: "";
+            display: block;
+            box-sizing: border-box;
+            position: absolute
+        }
+
+        .gg-copy::before {
+            background:
+            linear-gradient( to left,
+            currentColor 5px, transparent 0)
+            no-repeat right top/5px 2px,
+            linear-gradient( to left,
+            currentColor 5px, transparent 0)
+            no-repeat left bottom/ 2px 5px;
+            box-shadow: inset -4px -4px 0 -2px;
+            bottom: -6px;
+            right: -6px;
+            width: 14px;
+            height: 18px
+        }
+
+        .gg-copy::after {
+            width: 6px;
+            height: 2px;
+            background: currentColor;
+            left: 2px;
+            top: 2px;
+            box-shadow: 0 4px 0,0 8px 0
+        } 
+
+        .gg-copy:hover {
+            cursor: pointer;
+
+            color: rgb(255, 140, 0);
+        }
+
+        .copy_result {
+            height: 50px;
+        }
+
+        .copy_ok {
+            color: green;
+        }
+
+        .copy_fail {
+            color: red;
         }
 
 
@@ -111,7 +189,11 @@
     <main id="main">
     </main>
 
-    <div id="code" class="code">Код</div>
+    <div class="result">
+        <span id="code" class="code">Код</span>
+        <i id="copy" class="gg-copy" onclick="Copy()"></i>
+    </div>
+    <div id="copy_result" class="copy_result"></div>
     <button onclick="Encode()">Получить правила</button>
 
     <script>
@@ -206,17 +288,30 @@
                 this.SetBaseCards();
             }
 
+            IsException(prop) {
+                if (prop == this.propertysCards[0] ||
+                    prop == this.propertysCards[1] ||
+                    prop == this.propertysCards[8] ||
+                    prop == this.propertysCards[17])
+                    return true;
+                else 
+                    return false;
+            }
+
             AddToggleEvent(prop, num) {
                 let title = document.getElementById(prop + "_title");
                 let rule = document.getElementById(prop + `_${num}`);
                 
                 rule.addEventListener("click", () => {
                         if (rule.getAttribute("check") == "false") {
-                            console.log(prop + " was false");
                             rule.classList.add("check");
                             rule.setAttribute("check", "true");
+                            if (num != 0 && !this.IsException(prop)) {
+                                let rule_0 = document.getElementById(prop + '_0');
+                                rule_0.classList.add("check");
+                                rule_0.setAttribute("check", true);
+                            }
                         } else {
-                            console.log(prop + " was true");
                             rule.classList.remove("check");
                             rule.setAttribute("check", "false");
                         }
@@ -496,6 +591,29 @@
             code.innerHTML = game.TakeRule();
             code.classList.add("check");
 
+            document.getElementById("copy_result").innerHTML = "";
+
+        }
+
+        function Copy() {
+            let code = document.getElementById("code");
+            let result = document.getElementById("copy_result");
+            if (code.classList.contains("check")) {
+                navigator.clipboard.writeText(code.innerHTML)
+                .then(() => {
+                
+                result.classList.remove("copy_fail");
+                result.classList.add("copy_ok");
+                result.innerHTML = "Скопировали";
+                })
+                .catch(err => {
+                    console.log('Something went wrong', err);
+                })
+            } else {
+                result.classList.remove("copy_ok");
+                result.classList.add("copy_fail");
+                result.innerHTML = "Правила изменены";
+            }
         }
 
     </script>
