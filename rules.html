@@ -9,6 +9,7 @@
         body {
             display: flex;
             flex-direction: column;
+            align-items: center;
 
             background-color: rgb(30, 30, 30);
             color:rgb(126, 126, 126);
@@ -16,15 +17,135 @@
 
         }
 
-        body>dl>dt {
+        #input {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+            margin: 20px;
+        }
+
+        input {
+            text-align: center;
+        }
+
+        button {
+            margin: 10px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+
+            width: 95%;
+            border: 4px red solid;
+            border-radius: 8px;
+
+            padding: 10px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 18pt;
+
+            margin-bottom: 40px;
+        }
+
+        .rule {
+            margin-bottom: 15px;
+        }
+
+        .menu {
             display: none;
+            position: fixed;
+            right: 0px;
+            top: 50px;
+            /* bottom:0; */
+            
+            width: 260px;
+            /* height: fit-content; */
+
+            background-color: rgb(25, 25, 25);
+
+            overflow-y: scroll;
+            overflow-x: hidden;
+
+            z-index: 1000;
         }
 
-        dt:hover {
+        .menu_block {
+            margin: 10px;
+        }
+        .menu_block:first-child {
+            margin-bottom: 30px;
+        }
+
+        .menu_block .title {
+            margin-bottom: 25px;
+        }
+
+        .name {
+            margin-bottom: 15px;
+        }
+
+        .name:hover {
             cursor: pointer;
+            color:rgb(106, 128, 158);
+            font-weight: bold;
         }
 
+        .menu-icon {
+            position: fixed;
+            right: 20px;
+            top: 15px;
 
+            height: 30px;
+            width: 40px;
+        }
+
+        .gg-menu {
+            transform: scale(var(--ggs,1.5));
+            margin-top: 15px;
+            margin-left: 10px;
+        }
+
+        .gg-menu,
+        .gg-menu::after,
+        .gg-menu::before {
+            box-sizing: border-box;
+            position: relative;
+
+            display: block;
+            width: 20px;
+            height: 2px;
+            border-radius: 3px;
+            background: currentColor
+        }
+
+        .gg-menu::after,
+        .gg-menu::before {
+            content: "";
+            position: absolute;
+            top: -6px
+        }
+
+        .gg-menu::after {
+            top: 6px
+        } 
+
+        .menu-icon:hover {
+            cursor: pointer;
+
+            color: rgb(255, 140, 0);
+        }
+
+        .black_screen {
+            position: absolute;
+
+            width: 100%;
+            height:100%;
+
+            background-color: rgba(0, 0, 0, 0.4);
+        }
 
         @media screen and (max-width: 450px) {
             body {
@@ -39,21 +160,15 @@
         <input type="text" id="code" placeholder="Код">
         <button onclick="Decode()">Получить правила</button>
     </div>
-    <!-- <div id="rules"> -->
-    <dl id="general">
-        <dt id="general_dt">Основные правила</dt>
-    </dl>
 
-    <dl id="card">
-        <dt id="card_dt">Правила карт</dt>
-    </dl>
-    <!-- </div> -->
+    <div class="menu-icon" onclick="ToggleMenu()"><i class="gg-menu"></i></div>
 
-
-
-
+    <div id="menu" class="menu" display="block">
+    </div>
 
     <script>
+
+        
 
         class Game {
 
@@ -134,16 +249,34 @@
                     "Мирный"
 
                 ];
+                
+                this.baseNames = new Map();
+                this.propertysGeneral.forEach(el => {
+                    this.baseNames.set(el, []);
+                });
+                this.propertysCards.forEach(el => {
+                    this.baseNames.set(el, []);
+                });
+                this.SetBaseNames();
+
                 // set base general rules
                 this.baseGeneral = new Map();
-
                 this.propertysGeneral.forEach(el => {
                     this.baseGeneral.set(el, []);
                 });
-                //console.log(this.baseGeneral);
                 this.SetBaseGeneral();
+                
+                
+                this.ShowMenu(this.propertysGeneral, this.propertysGeneralNames, "general", "Основные правила");
+                //this.ShowRule(this.baseGeneral, this.propertysGeneral, this.propertysGeneralNames, "general", 0);
 
-                this.ShowRule(this.baseGeneral, this.propertysGeneral, this.propertysGeneralNames, "general", 0);
+                let menu_temp = document.getElementById("general").children;
+                for (let i = 1; i < menu_temp.length; i++) {
+                    let element = menu_temp[i];
+                    let prop = element.getAttribute("id");
+                    
+                    this.AddEventShow(prop);
+                }
 
                 // set base card rules
                 this.baseCards = new Map();
@@ -151,12 +284,11 @@
                 this.propertysCards.forEach(el => {
                     this.baseCards.set(el, []);
                 });
-                //console.log(this.baseCards);
+
                 this.SetBaseCards();
             }
 
             Parser(code) {
-                //console.log("Parser start");
                 let arr_code = [];
 
                 code = code.split("");
@@ -204,6 +336,8 @@
             }
 
             Switcher(code) {
+                Clear();
+
                 this.Parser(code);
 
                 for (let i = 0; i < this.propertysCards.length; i++) {
@@ -211,24 +345,26 @@
                     
                 }
 
-                let main = document.getElementById("card_div");
+                this.ShowMenu(this.propertysCards, this.propertysCardsNames, "cards", "Правила карт");
 
-                if (main) {
-                    main.remove();
+                let menu_temp = document.getElementById("cards").children;
+                for (let i = 1; i < menu_temp.length; i++) {
+                    let element = menu_temp[i];
+                    let prop = element.getAttribute("id");
+                    
+                    this.AddEventShow(prop);
                 }
-
-                this.ShowRule(this.baseCards, this.propertysCards, this.propertysCardsNames, "card", 1);
             }
 
             AddToggleEvent(master, slave) {
                 master.addEventListener("click", () => {
-                        let el = document.getElementById(slave + "_div");
-                        if (el.style.display == "none") {
-                            el.style.display = "block";
-                        } else {
-                            el.style.display = "none";
-                        }
-                    });
+                    let el = document.getElementById(slave + "_div");
+                    if (el.style.display == "none") {
+                        el.style.display = "block";
+                    } else {
+                        el.style.display = "none";
+                    }
+                });
             }
 
             Check(arr) {
@@ -244,104 +380,186 @@
                 return is_find
             }
 
-            ShowRule(base, propertys, names, main_id, is_settings) {
-                console.log(document);
-                let main = document.getElementById(main_id);
-                console.log(main);
+            ShowMenu(props, names, opt, title_name) {
+                let menu = document.getElementById("menu");
 
-                document.getElementById(main_id + "_dt").style.display = "block";
+                let block = document.createElement("div");
+                
+                block.classList.add("menu_block");
+                block.id = opt;
 
-                let main_div = document.createElement("div");
-                main_div.id = main_id + "_div";
+                let title = document.createElement("div");
+                title.id = "title_" + opt;
+                title.classList.add("title");
+                title.innerHTML = title_name;
 
-                console.log(propertys);
+                block.appendChild(title);
 
-                for (let i = 0; i < propertys.length; i++) {
-                    const prop = propertys[i];
-                    
-                    let data = base.get(prop);
-
-                    // console.log(data);
-
-                    if (is_settings) {
-                        console.log("is_setting is ok for " + prop);
-                        if (this.Check(this.settings.get(prop))) {
-                            console.log("check is done");
-                            let main_dd = document.createElement("dd");
-
-                            let dl = document.createElement("dl");
-
-                            let dt = document.createElement("dt");
-                            dt.innerHTML = names[i];
-                            dt.id = prop;
-                            
-                            dl.appendChild(dt);
-
-                            let div = document.createElement("div");
-                            for (let j = 0; j < this.settings.get(prop).length; ++j) {
-                                const sett = this.settings.get(prop)[j];
-                                console.log(sett);
-                                if(sett) {
-                                    let dd = document.createElement("dd");
-                                    dd.innerHTML = base.get(prop)[j];
-                                    div.appendChild(dd);
-                                }
-                            }
-
-                            div.id = prop + "_div";
-                            div.style.display = "none";
-                            
-                            dl.appendChild(div);
-
-                            main_dd.appendChild(dl);
-
-                            main_div.appendChild(main_dd);
-                        }
-                    } else {
-                        let main_dd = document.createElement("dd");
-
-                        let dl = document.createElement("dl");
-
-                        let dt = document.createElement("dt");
-                        dt.innerHTML = names[i];
-                        dt.id = prop;
-
-                        dl.appendChild(dt);
-
-                        let div = document.createElement("div");
-
-                        data.forEach(el => {
-                            let dd = document.createElement("dd");
-                            dd.innerHTML = el;
-                            div.appendChild(dd);
-                        });
-
-                        div.id = prop + "_div";
-                        div.style.display = "none";
-                        
-                        dl.appendChild(div);
-
-                        main_dd.appendChild(dl);
-
-                        main_div.appendChild(main_dd);
-
-                    }
+                for (let i = 0; i < props.length; i++) {
+                    let item = document.createElement("div");
+                    item.id = props[i];
+                    item.classList.add("name");
+                    item.innerHTML = names[i];
+                
+                    block.appendChild(item);
                 }
 
-                main.appendChild(main_div);
-
-                propertys.forEach(prop => {
-                    if (is_settings) {
-                        if (this.Check(this.settings.get(prop))) {
-                            this.AddToggleEvent(document.getElementById(prop), prop);
-                        }
-                    } else {
-                        this.AddToggleEvent(document.getElementById(prop), prop);
-                    }
-                });
-
-                this.AddToggleEvent(document.getElementById(main_id + "_dt"), main_id);
+                menu.appendChild(block);
             }
+
+            ShowCard(prop) {
+                let remove = document.getElementById("card");
+                if (remove) {
+                    remove.remove();
+                }
+
+                let card = document.createElement("div");
+                card.id = "card";
+                card.classList.add("card");
+
+                let card_title = document.createElement("div");
+                card_title.id = prop;
+                card_title.classList.add("title");
+                card_title.innerHTML = this.baseNames.get(prop);
+
+                card.appendChild(card_title);
+
+                let rules;
+
+                if (this.baseGeneral.has(prop)) {
+                    rules = this.baseGeneral.get(prop);
+
+                    rules.forEach(rule_text => {
+                        let rule = document.createElement("div");
+                        rule.classList.add("rule");
+                        rule.innerHTML = rule_text;
+                        card.appendChild(rule);
+                    });
+                } else if (this.baseCards.has(prop)) {
+                    rules = this.baseCards.get(prop);
+
+                    for (let j = 0; j < this.settings.get(prop).length; ++j) {
+                        const sett = this.settings.get(prop)[j];
+                        if(sett) {
+                            let rule = document.createElement("div");
+                            rule.classList.add("rule");
+                            rule.innerHTML = this.baseCards.get(prop)[j];
+                            card.appendChild(rule)
+                        }
+                    }
+                } else {
+                    console.log("didn't find prop in base");
+                }
+
+                document.body.appendChild(card);
+            }
+
+            AddEventShow(prop) {
+                let el = document.getElementById(prop);
+                el.addEventListener("click", () => {
+                    this.ShowCard(prop);
+                    ToggleMenu();
+                })
+            }
+
+            // ShowRule(base, propertys, names, main_id, is_settings) {
+            //     console.log(document);
+            //     let main = document.getElementById(main_id);
+            //     console.log(main);
+
+            //     document.getElementById(main_id + "_dt").style.display = "block";
+
+            //     let main_div = document.createElement("div");
+            //     main_div.id = main_id + "_div";
+
+            //     console.log(propertys);
+
+            //     for (let i = 0; i < propertys.length; i++) {
+            //         const prop = propertys[i];
+                    
+            //         let data = base.get(prop);
+
+            //         // console.log(data);
+
+            //         if (is_settings) {
+            //             console.log("is_setting is ok for " + prop);
+            //             if (this.Check(this.settings.get(prop))) {
+            //                 console.log("check is done");
+            //                 let main_dd = document.createElement("dd");
+
+            //                 let dl = document.createElement("dl");
+
+            //                 let dt = document.createElement("dt");
+            //                 dt.innerHTML = names[i];
+            //                 dt.id = prop;
+                            
+            //                 dl.appendChild(dt);
+
+            //                 let div = document.createElement("div");
+            //                 for (let j = 0; j < this.settings.get(prop).length; ++j) {
+            //                     const sett = this.settings.get(prop)[j];
+            //                     console.log(sett);
+            //                     if(sett) {
+            //                         let dd = document.createElement("dd");
+            //                         dd.innerHTML = base.get(prop)[j];
+            //                         div.appendChild(dd);
+            //                     }
+            //                 }
+
+            //                 div.id = prop + "_div";
+            //                 div.style.display = "none";
+                            
+            //                 dl.appendChild(div);
+
+            //                 main_dd.appendChild(dl);
+
+            //                 main_div.appendChild(main_dd);
+            //             }
+            //         } else {
+            //             let main_dd = document.createElement("dd");
+
+            //             let dl = document.createElement("dl");
+
+            //             let dt = document.createElement("dt");
+            //             dt.innerHTML = names[i];
+            //             dt.id = prop;
+
+            //             dl.appendChild(dt);
+
+            //             let div = document.createElement("div");
+
+            //             data.forEach(el => {
+            //                 let dd = document.createElement("dd");
+            //                 dd.innerHTML = el;
+            //                 div.appendChild(dd);
+            //             });
+
+            //             div.id = prop + "_div";
+            //             div.style.display = "none";
+                        
+            //             dl.appendChild(div);
+
+            //             main_dd.appendChild(dl);
+
+            //             main_div.appendChild(main_dd);
+
+            //         }
+            //     }
+
+            //     main.appendChild(main_div);
+
+            //     propertys.forEach(prop => {
+            //         if (is_settings) {
+            //             if (this.Check(this.settings.get(prop))) {
+            //                 this.AddToggleEvent(document.getElementById(prop), prop);
+            //             }
+            //         } else {
+            //             this.AddToggleEvent(document.getElementById(prop), prop);
+            //         }
+            //     });
+
+            //     this.AddToggleEvent(document.getElementById(main_id + "_dt"), main_id);
+            // }
 
             SetBaseGeneral() {
                 this.PushToBase(this.baseGeneral, "order", "Игра делится на 4 временных промежутка: день, вечер, ночь, утро.");
@@ -475,9 +693,15 @@
                     this.PushToBase(this.baseCards, "mirniy", `${i}` + temp_rule);
                 
                 }
+            }
 
-                console.log(this.baseCards);
-                
+            SetBaseNames() {
+                for (let i = 0; i < this.propertysGeneral.length; i++) {
+                    this.PushToBase(this.baseNames, this.propertysGeneral[i], this.propertysGeneralNames[i]);
+                }
+                for (let i = 0; i < this.propertysCards.length; i++) {
+                    this.PushToBase(this.baseNames, this.propertysCards[i], this.propertysCardsNames[i]);
+                }   
             }
 
             PushToBase(base, key, value) {
@@ -496,6 +720,7 @@
             
             baseCards;
             baseGeneral;
+            baseNames;
 
             code;
             
@@ -506,6 +731,67 @@
         function Decode() {
             code = document.getElementById("code").value;
             game.Switcher(code);
+        }
+
+        function ToggleMenu() {
+            let menu = document.getElementById("menu");
+
+            if (menu.style.display == "block") {
+                menu.style.display = "none";
+                RemoveBlackScreen();
+            } else {
+                menu.style.display = "block";
+                AddScroll();
+                AddBlackScreen();
+            }
+        }
+
+        function AddBlackScreen() {
+            let black = document.createElement("div");
+            
+            black.classList.add("black_screen");
+            black.id = "black_screen";
+
+            black.addEventListener("click", () => {
+                ToggleMenu();
+            });
+
+            document.body.appendChild(black);
+        }
+
+        function RemoveBlackScreen() {
+            document.getElementById("black_screen").remove();
+        }
+
+        function AddScroll() {
+            let temp_elem = document.getElementById("menu");
+            let height_el = 0;
+
+            for (let i = 0; i < temp_elem.children.length; i++) {
+                const el = temp_elem.children[i];
+                height_el += el.offsetHeight;                
+            }
+
+            let height_screen = document.documentElement.clientHeight;
+            
+            if (height_el > height_screen) {
+                temp_elem.style.bottom = 0;
+                temp_elem.style.overflowY = "scroll";
+            } else {
+                temp_elem.style.overflowY = "hidden";
+            }
+        }
+
+        function Clear() {
+            let card = document.getElementById("card");
+            if (card) {
+                card.remove();
+            }
+            
+            let temp_cards = document.getElementById("cards");
+            if (temp_cards) {
+                temp_cards.remove();
+            }
         }
 
     </script>
