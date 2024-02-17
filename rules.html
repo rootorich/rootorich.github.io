@@ -20,16 +20,47 @@
         #input {
             display: flex;
             flex-direction: column;
-            width: 50%;
+            align-items: center;
+
+            width: 70%;
             margin: 20px;
         }
 
         input {
             text-align: center;
+            color: rgb(126, 126, 126);
+            font-size: 14pt;
+
+            padding: 10px;
+
+            background: rgb(30,30,30);
+            border: 2px rgb(126, 126, 126) solid;
+            border-radius: 8px;
+        }
+
+        input:focus-visible {
+            outline: 2px rgb(126, 126, 126) solid;
+            
+
         }
 
         button {
+            color: rgb(126, 126, 126);
+            font-weight: bold;
+
+            width: fit-content;
             margin: 10px;
+            padding: 10px 20px;
+
+            background: rgb(30, 30, 30);
+            border: 4px rgb(126, 126, 126) solid;
+            border-radius: 8px;
+        }
+
+        button:hover {
+            border: 4px rgba(255, 140, 0, 0.6) solid;
+            color: rgba(255, 140, 0, 0.6);
+
         }
 
         .card {
@@ -37,7 +68,7 @@
             flex-direction: column;
 
             width: 95%;
-            border: 4px red solid;
+            border: 4px rgba(255, 140, 0, 0.6) solid;
             border-radius: 8px;
 
             padding: 10px;
@@ -95,7 +126,7 @@
 
         .menu-icon {
             position: fixed;
-            right: 20px;
+            right: 15px;
             top: 15px;
 
             height: 30px;
@@ -340,20 +371,29 @@
 
                 this.Parser(code);
 
+
                 for (let i = 0; i < this.propertysCards.length; i++) {
                     this.settings.set(this.propertysCards[i], this.code[i]);
                     
                 }
+                // console.log(this.propertysCards);
 
                 this.ShowMenu(this.propertysCards, this.propertysCardsNames, "cards", "Правила карт");
+                this.DeleteSomeMenu();
 
-                let menu_temp = document.getElementById("cards").children;
-                for (let i = 1; i < menu_temp.length; i++) {
+                let menu_temp = document.getElementById("cards");
+                if (menu_temp !== null) {
+                    menu_temp = menu_temp.children;
+
+                    for (let i = 1; i < menu_temp.length; i++) {
                     let element = menu_temp[i];
                     let prop = element.getAttribute("id");
                     
                     this.AddEventShow(prop);
                 }
+                }
+
+                
             }
 
             AddToggleEvent(master, slave) {
@@ -383,6 +423,10 @@
             ShowMenu(props, names, opt, title_name) {
                 let menu = document.getElementById("menu");
 
+                if (document.getElementById(opt)) {
+                    document.getElementById(opt).remove();
+                }
+
                 let block = document.createElement("div");
                 
                 block.classList.add("menu_block");
@@ -395,6 +439,9 @@
 
                 block.appendChild(title);
 
+                console.log(props);
+                console.log(props.length);
+
                 for (let i = 0; i < props.length; i++) {
                     let item = document.createElement("div");
                     item.id = props[i];
@@ -404,10 +451,91 @@
                     block.appendChild(item);
                 }
 
+                console.log(block);
+
                 menu.appendChild(block);
             }
 
+            DeleteSomeMenu() {
+                let cards = document.getElementById("cards").children;
+                console.log(cards.length);
+
+                const len = cards.length;
+
+                for (let i = len - 1; i >= 1; i--) {
+                    const card = cards[i];
+                    console.log(i);
+                    console.log(this.settings.get(card.id))
+
+                    if (this.settings.get(card.id) === undefined) {
+                        card.remove();
+                    }
+                }
+
+                if (cards.length == 1) {
+                    document.getElementById("cards").remove();
+                }
+            }
+
             ShowCard(prop) {
+                // let remove = document.getElementById("card");
+                // if (remove) {
+                //     remove.remove();
+                // }
+
+                // let card = document.createElement("div");
+                // card.id = "card";
+                // card.classList.add("card");
+
+                // let card_title = document.createElement("div");
+                // card_title.id = prop;
+                // card_title.classList.add("title");
+                // card_title.innerHTML = this.baseNames.get(prop);
+
+                // card.appendChild(card_title);
+
+                let rules;
+
+                if (this.baseGeneral.has(prop)) {
+                    let card = this.CreateCard(prop);
+                    rules = this.baseGeneral.get(prop);
+
+                    rules.forEach(rule_text => {
+                        let rule = document.createElement("div");
+                        rule.classList.add("rule");
+                        rule.innerHTML = rule_text;
+                        card.appendChild(rule);
+                    });
+
+                    document.body.appendChild(card);
+                } else if (this.baseCards.has(prop)) {
+                    
+                    if (this.settings.get(prop)) {
+                        let card = this.CreateCard(prop);
+                        rules = this.baseCards.get(prop);
+                        console.log(rules);
+                        console.log(this.settings.get(prop));
+
+                        for (let j = 0; j < this.settings.get(prop).length; ++j) {
+                            const sett = this.settings.get(prop)[j];
+                            if(sett) {
+                                let rule = document.createElement("div");
+                                rule.classList.add("rule");
+                                rule.innerHTML = this.baseCards.get(prop)[j];
+                                card.appendChild(rule)
+                            }
+                        }
+
+                        document.body.appendChild(card);
+                    }
+                    
+                } else {
+                    console.log("didn't find prop in base");
+                }
+
+            }
+
+            CreateCard(prop) {
                 let remove = document.getElementById("card");
                 if (remove) {
                     remove.remove();
@@ -424,34 +552,7 @@
 
                 card.appendChild(card_title);
 
-                let rules;
-
-                if (this.baseGeneral.has(prop)) {
-                    rules = this.baseGeneral.get(prop);
-
-                    rules.forEach(rule_text => {
-                        let rule = document.createElement("div");
-                        rule.classList.add("rule");
-                        rule.innerHTML = rule_text;
-                        card.appendChild(rule);
-                    });
-                } else if (this.baseCards.has(prop)) {
-                    rules = this.baseCards.get(prop);
-
-                    for (let j = 0; j < this.settings.get(prop).length; ++j) {
-                        const sett = this.settings.get(prop)[j];
-                        if(sett) {
-                            let rule = document.createElement("div");
-                            rule.classList.add("rule");
-                            rule.innerHTML = this.baseCards.get(prop)[j];
-                            card.appendChild(rule)
-                        }
-                    }
-                } else {
-                    console.log("didn't find prop in base");
-                }
-
-                document.body.appendChild(card);
+                return card;
             }
 
             AddEventShow(prop) {
