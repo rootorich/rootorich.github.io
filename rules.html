@@ -371,12 +371,10 @@
 
                 this.Parser(code);
 
-
                 for (let i = 0; i < this.propertysCards.length; i++) {
                     this.settings.set(this.propertysCards[i], this.code[i]);
                     
                 }
-                // console.log(this.propertysCards);
 
                 this.ShowMenu(this.propertysCards, this.propertysCardsNames, "cards", "Правила карт");
                 this.DeleteSomeMenu();
@@ -439,9 +437,6 @@
 
                 block.appendChild(title);
 
-                console.log(props);
-                console.log(props.length);
-
                 for (let i = 0; i < props.length; i++) {
                     let item = document.createElement("div");
                     item.id = props[i];
@@ -451,24 +446,30 @@
                     block.appendChild(item);
                 }
 
-                console.log(block);
-
                 menu.appendChild(block);
             }
 
             DeleteSomeMenu() {
                 let cards = document.getElementById("cards").children;
-                console.log(cards.length);
 
                 const len = cards.length;
 
                 for (let i = len - 1; i >= 1; i--) {
                     const card = cards[i];
-                    console.log(i);
-                    console.log(this.settings.get(card.id))
 
                     if (this.settings.get(card.id) === undefined) {
                         card.remove();
+                    } else  {
+                        let is_remove = true;
+                        this.settings.get(card.id).forEach(el => {
+                            if (el != 0) {
+                                is_remove = false;
+                            }
+                        });
+
+                        if (is_remove) {
+                            card.remove();
+                        }
                     }
                 }
 
@@ -478,22 +479,6 @@
             }
 
             ShowCard(prop) {
-                // let remove = document.getElementById("card");
-                // if (remove) {
-                //     remove.remove();
-                // }
-
-                // let card = document.createElement("div");
-                // card.id = "card";
-                // card.classList.add("card");
-
-                // let card_title = document.createElement("div");
-                // card_title.id = prop;
-                // card_title.classList.add("title");
-                // card_title.innerHTML = this.baseNames.get(prop);
-
-                // card.appendChild(card_title);
-
                 let rules;
 
                 if (this.baseGeneral.has(prop)) {
@@ -513,15 +498,15 @@
                     if (this.settings.get(prop)) {
                         let card = this.CreateCard(prop);
                         rules = this.baseCards.get(prop);
-                        console.log(rules);
-                        console.log(this.settings.get(prop));
 
                         for (let j = 0; j < this.settings.get(prop).length; ++j) {
                             const sett = this.settings.get(prop)[j];
                             if(sett) {
                                 let rule = document.createElement("div");
                                 rule.classList.add("rule");
-                                rule.innerHTML = this.baseCards.get(prop)[j];
+                                if (this.baseCards.get(prop)[j] !== undefined) {
+                                    rule.innerHTML = this.baseCards.get(prop)[j];
+                                }
                                 card.appendChild(rule)
                             }
                         }
